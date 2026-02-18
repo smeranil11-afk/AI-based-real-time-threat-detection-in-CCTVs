@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Violence Detection System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="background-animation"></div>
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <circle cx="20" cy="20" r="18" stroke="url(#gradient)" stroke-width="2"/>
+                            <path d="M20 10L20 30M10 20L30 20" stroke="url(#gradient)" stroke-width="2" stroke-linecap="round"/>
+                            <defs>
+                                <linearGradient id="gradient" x1="0" y1="0" x2="40" y2="40">
+                                    <stop offset="0%" stop-color="#667eea"/>
+                                    <stop offset="100%" stop-color="#764ba2"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <h1>AI Violence Detection</h1>
+                        <p>Advanced Computer Vision System</p>
+                    </div>
+                </div>
+                <div class="status-badge">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">System Ready</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Control Panel -->
+            <div class="glass-card control-panel">
+                <div class="card-header">
+                    <h2>⚙️ Control Center</h2>
+                </div>
+                
+                <div class="control-grid">
+                    <!-- Detection Mode -->
+                    <div class="control-item">
+                        <label for="modeSelect">Detection Mode</label>
+                        <select id="modeSelect" class="select-input">
+                            <option value="basic">Basic - Motion Detection</option>
+                            <option value="intermediate">Intermediate - Intensity Analysis</option>
+                            <option value="advanced" selected>Advanced - AI + Tracking</option>
+                        </select>
+                    </div>
+
+                    <!-- Source Tabs -->
+                    <div class="source-selector">
+                        <div class="tab-buttons">
+                            <button class="tab-btn active" data-tab="camera">
+                                <span class="tab-icon">📹</span>
+                                <span>Camera</span>
+                            </button>
+                            <button class="tab-btn" data-tab="upload">
+                                <span class="tab-icon">📤</span>
+                                <span>Upload</span>
+                            </button>
+                            <button class="tab-btn" data-tab="library">
+                                <span class="tab-icon">📚</span>
+                                <span>Library</span>
+                            </button>
+                        </div>
+
+                        <!-- Camera Tab -->
+                        <div class="tab-panel active" id="camera-tab">
+                            <div class="control-item">
+                                <label for="sourceInput">Camera ID</label>
+                                <input type="text" id="sourceInput" value="0" class="text-input" placeholder="0 for default">
+                                <small>0 = Default camera, 1 = Secondary camera</small>
+                            </div>
+                        </div>
+
+                        <!-- Upload Tab -->
+                        <div class="tab-panel" id="upload-tab">
+                            <div class="upload-zone" id="uploadZone">
+                                <input type="file" id="videoUpload" accept="video/*" hidden>
+                                <div class="upload-content">
+                                    <div class="upload-icon">📁</div>
+                                    <p class="upload-text">Drop video here or click to browse</p>
+                                    <p class="upload-hint">MP4, AVI, MOV, MKV (Max 500MB)</p>
+                                </div>
+                                <div id="uploadProgress" class="upload-progress" style="display: none;">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="progressFill"></div>
+                                    </div>
+                                    <p class="progress-text" id="progressText">Uploading...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Library Tab -->
+                        <div class="tab-panel" id="library-tab">
+                            <div id="uploadedVideosList" class="video-library">
+                                <p class="empty-state">No uploaded videos yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="startBtn" class="btn btn-primary">
+                        <span class="btn-icon">▶️</span>
+                        <span>Start Analysis</span>
+                    </button>
+                    <button id="stopBtn" class="btn btn-danger" disabled>
+                        <span class="btn-icon">⏹️</span>
+                        <span>Stop</span>
+                    </button>
+                </div>
+
+                <div id="message" class="message-box"></div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="dashboard-grid">
+                <!-- Video Feed -->
+                <div class="glass-card video-section">
+                    <div class="card-header">
+                        <h2>📹 Live Feed</h2>
+                        <span class="live-indicator" id="liveBadge">
+                            <span class="pulse-dot"></span>
+                            LIVE
+                        </span>
+                    </div>
+                    <div class="video-container">
+                        <img id="videoFeed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+                        <div class="video-placeholder" id="videoPlaceholder">
+                            <div class="placeholder-icon">📹</div>
+                            <p>Waiting for video feed...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="glass-card stats-section">
+                    <div class="card-header">
+                        <h2>📊 Analytics</h2>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card alert-stat">
+                            <div class="stat-icon">🚨</div>
+                            <div class="stat-info">
+                                <p class="stat-label">Total Alerts</p>
+                                <p class="stat-value" id="totalAlerts">0</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card people-stat">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-info">
+                                <p class="stat-label">People Detected</p>
+                                <p class="stat-value" id="peopleCount">0</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card violence-stat">
+                            <div class="stat-icon">⚡</div>
+                            <div class="stat-info">
+                                <p class="stat-label">Violence Score</p>
+                                <p class="stat-value" id="violenceScore">0.00</p>
+                                <div class="mini-bar">
+                                    <div class="mini-fill" id="scoreFill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card fps-stat">
+                            <div class="stat-icon">📹</div>
+                            <div class="stat-info">
+                                <p class="stat-label">Frame Rate</p>
+                                <p class="stat-value" id="fps">0 FPS</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card motion-stat">
+                            <div class="stat-icon">🎯</div>
+                            <div class="stat-info">
+                                <p class="stat-label">Motion Status</p>
+                                <p class="stat-value small" id="motionStatus">Idle</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card time-stat">
+                            <div class="stat-icon">🕐</div>
+                            <div class="stat-info">
+                                <p class="stat-label">Last Alert</p>
+                                <p class="stat-value small" id="lastAlert">None</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Log -->
+            <div class="glass-card alert-log">
+                <div class="card-header">
+                    <h2>🚨 Alert History</h2>
+                </div>
+                <div id="alertList" class="alert-timeline">
+                    <p class="empty-state">No alerts recorded</p>
+                </div>
+            </div>
+
+            <!-- Saved Videos -->
+            <div class="glass-card saved-videos">
+                <div class="card-header">
+                    <h2>💾 Saved Recordings</h2>
+                    <button id="refreshVideos" class="btn btn-secondary btn-sm">
+                        <span>🔄</span>
+                    </button>
+                </div>
+                <div id="videoList" class="video-grid">
+                    <p class="empty-state">No saved videos</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>AI Violence Detection System v3.0 | Powered by YOLOv8 & Advanced Computer Vision</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
