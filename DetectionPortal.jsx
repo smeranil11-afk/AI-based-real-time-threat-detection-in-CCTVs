@@ -4,17 +4,48 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import Navigation from "../components/Navigation";
 import Footer from "../components/Footer";
 import { Badge } from "../components/ui/badge";
-import { Camera, Shield, Activity } from "lucide-react";
+import { Camera, Shield, Activity, Brain, Cpu, Zap, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function DetectionPortal() {
     const [webcamEnabled, setWebcamEnabled] = useState(false);
     const navigate = useNavigate();
+    const [modelInfo, setModelInfo] = useState(null);
+    const [isTraining, setIsTraining] = useState(false);
+    const [trainingResult, setTrainingResult] = useState(null);
+    const BACKEND = "http://localhost:5000";
 
     const handleRunAssessment = () => {
         navigate("/monitor");
+    };
+
+    useEffect(() => {
+        const fetchModelInfo = async () => {
+            try {
+                const res = await fetch(`${BACKEND}/model_info`, { signal: AbortSignal.timeout(3000) });
+                if (res.ok) setModelInfo(await res.json());
+            } catch { /* offline */ }
+        };
+        fetchModelInfo();
+        const interval = setInterval(fetchModelInfo, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleTrainModel = async () => {
+        setIsTraining(true);
+        setTrainingResult(null);
+        try {
+            const res = await fetch(`${BACKEND}/train`, { method: "POST" });
+            const data = await res.json();
+            setTrainingResult(data);
+            const infoRes = await fetch(`${BACKEND}/model_info`);
+            if (infoRes.ok) setModelInfo(await infoRes.json());
+        } catch (err) {
+            setTrainingResult({ error: err.message });
+        }
+        setIsTraining(false);
     };
 
     return (
@@ -34,12 +65,12 @@ export default function DetectionPortal() {
                             >
                                 <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
                                     Real-time Violence Detection for{" "}
-                                    <span className="text-electric">Safer Public Spaces</span>
+                                    <span className="text-electric">Safer Lifts</span>
                                 </h1>
                                 <p className="text-gray-400 text-lg">
-                                    Leveraging LSTM-CNN architecture to detect and prevent
-                                    violence before it escalates. Submit live footage for instant
-                                    AI-powered threat analysis.
+                                    AI-powered lift CCTV surveillance that detects violence,
+                                    hood touch, and bad touch in elevators. Upload lift footage
+                                    for instant AI-powered threat analysis.
                                 </p>
                             </motion.div>
 
@@ -72,7 +103,7 @@ export default function DetectionPortal() {
 
                                             {/* Camera Info */}
                                             <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm px-4 py-2 rounded-lg z-10">
-                                                <p className="text-white text-sm font-mono">Camera Feed #1</p>
+                                                <p className="text-white text-sm font-mono">Lift CCTV Feed</p>
                                                 <p className="text-gray-400 text-xs font-mono">
                                                     {new Date().toLocaleTimeString()}
                                                 </p>
@@ -117,17 +148,124 @@ export default function DetectionPortal() {
                                     </CardContent>
                                 </Card>
 
-                                <Card>
+                                        <Card>
                                     <CardContent className="p-4">
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="text-xs text-gray-400 uppercase mb-1">
-                                                    Active Cams
+                                                    Active Lifts
                                                 </p>
-                                                <p className="text-2xl font-bold text-white">12</p>
+                                                <p className="text-2xl font-bold text-white">4</p>
                                             </div>
                                             <Camera className="h-8 w-8 text-white" />
                                         </div>
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+
+                            {/* Model Statistics */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, delay: 0.1 }}
+                            >
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2">
+                                            <Brain className="h-5 w-5 text-electric" />
+                                            ML Model Statistics
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {modelInfo ? (
+                                            <div className="space-y-4">
+                                                {/* Metrics Grid */}
+                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                                    <div className="bg-navy-light rounded-lg p-3 text-center">
+                                                        <p className="text-xs text-gray-400 mb-1">Accuracy</p>
+                                                        <p className="text-xl font-bold text-green-400">{(modelInfo.accuracy * 100).toFixed(1)}%</p>
+                                                    </div>
+                                                    <div className="bg-navy-light rounded-lg p-3 text-center">
+                                                        <p className="text-xs text-gray-400 mb-1">Precision</p>
+                                                        <p className="text-xl font-bold text-electric">{(modelInfo.precision * 100).toFixed(1)}%</p>
+                                                    </div>
+                                                    <div className="bg-navy-light rounded-lg p-3 text-center">
+                                                        <p className="text-xs text-gray-400 mb-1">Recall</p>
+                                                        <p className="text-xl font-bold text-yellow-400">{(modelInfo.recall * 100).toFixed(1)}%</p>
+                                                    </div>
+                                                    <div className="bg-navy-light rounded-lg p-3 text-center">
+                                                        <p className="text-xs text-gray-400 mb-1">F1 Score</p>
+                                                        <p className="text-xl font-bold text-purple-400">{(modelInfo.f1 * 100).toFixed(1)}%</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Architecture & Dataset */}
+                                                <div className="flex flex-col sm:flex-row gap-3">
+                                                    <div className="flex-1 bg-navy-light rounded-lg p-3">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <Cpu className="h-3.5 w-3.5 text-electric" />
+                                                            <p className="text-xs text-gray-400">Architecture</p>
+                                                        </div>
+                                                        <p className="text-sm text-white font-medium">{modelInfo.architecture}</p>
+                                                    </div>
+                                                    <div className="flex-1 bg-navy-light rounded-lg p-3">
+                                                        <p className="text-xs text-gray-400 mb-1">Dataset</p>
+                                                        <p className="text-sm text-white font-medium">{modelInfo.trained_on}</p>
+                                                        <p className="text-xs text-gray-500 mt-0.5">{modelInfo.num_frames} frames × {modelInfo.img_size}px</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Confusion Matrix */}
+                                                {modelInfo.confusion_matrix && (
+                                                    <div className="bg-navy-light rounded-lg p-3">
+                                                        <p className="text-xs text-gray-400 mb-2">Confusion Matrix</p>
+                                                        <div className="grid grid-cols-2 gap-1 max-w-[200px]">
+                                                            <div className="bg-green-500/20 rounded p-2 text-center">
+                                                                <p className="text-xs text-gray-400">TN</p>
+                                                                <p className="text-sm font-bold text-green-400">{modelInfo.confusion_matrix[0][0]}</p>
+                                                            </div>
+                                                            <div className="bg-red-500/20 rounded p-2 text-center">
+                                                                <p className="text-xs text-gray-400">FP</p>
+                                                                <p className="text-sm font-bold text-red-400">{modelInfo.confusion_matrix[0][1]}</p>
+                                                            </div>
+                                                            <div className="bg-orange-500/20 rounded p-2 text-center">
+                                                                <p className="text-xs text-gray-400">FN</p>
+                                                                <p className="text-sm font-bold text-orange-400">{modelInfo.confusion_matrix[1][0]}</p>
+                                                            </div>
+                                                            <div className="bg-green-500/20 rounded p-2 text-center">
+                                                                <p className="text-xs text-gray-400">TP</p>
+                                                                <p className="text-sm font-bold text-green-400">{modelInfo.confusion_matrix[1][1]}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Model Status + Train Button */}
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className={`h-2 w-2 rounded-full ${modelInfo.model_loaded ? 'bg-green-500' : 'bg-red-500'}`}></span>
+                                                        <span className={`text-xs font-medium ${modelInfo.model_loaded ? 'text-green-400' : 'text-red-400'}`}>
+                                                            {modelInfo.model_loaded ? 'Model Loaded' : 'Model Not Loaded'}
+                                                        </span>
+                                                    </div>
+                                                    <button
+                                                        onClick={handleTrainModel}
+                                                        disabled={isTraining}
+                                                        className="ml-auto flex items-center gap-2 bg-electric/20 hover:bg-electric/30 border border-electric/40 text-electric text-xs font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                                                    >
+                                                        {isTraining ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
+                                                        {isTraining ? 'Training...' : 'Train Model'}
+                                                    </button>
+                                                </div>
+                                                {trainingResult && (
+                                                    <div className={`text-sm p-3 rounded-lg ${trainingResult.error ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'}`}>
+                                                        {trainingResult.error || `✓ Training complete! Accuracy: ${(trainingResult.metrics?.accuracy * 100).toFixed(1)}%`}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <p className="text-sm text-gray-400">Connect to backend to view model statistics.</p>
+                                        )}
                                     </CardContent>
                                 </Card>
                             </motion.div>

@@ -25,13 +25,13 @@ export default function LandingPage() {
                             transition={{ duration: 0.8 }}
                         >
                             <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
-                                Intelligent Safety.{" "}
-                                <span className="text-electric">Real-time</span> Protection.
+                                Lift Safety AI.{" "}
+                                <span className="text-electric">Real-time</span> Elevator Monitoring.
                             </h1>
                             <p className="text-lg text-gray-300 mb-8 leading-relaxed">
-                                Leverage LSTM-CNN based architecture to detect and prevent
-                                violence in public spaces. Our AI analyzes video feeds in
-                                real-time with 99.2% accuracy, ensuring immediate threat response.
+                                AI-powered lift CCTV surveillance that detects violence, hood touch,
+                                and bad touch in elevators. Upload lift footage or connect live
+                                cameras for instant threat analysis and automated alerts.
                             </p>
                             <div className="flex gap-4">
                                 <Button size="lg" className="gap-2">
@@ -55,28 +55,28 @@ export default function LandingPage() {
                                 {[
                                     {
                                         id: 1,
-                                        label: "CAM 1 — STREET",
+                                        label: "LIFT CAM 1 — FLOOR 1",
                                         time: "10:15:23",
                                         src: cctvImage1,
                                         alert: false,
                                     },
                                     {
                                         id: 2,
-                                        label: "CAM 2 — CORRIDOR",
+                                        label: "LIFT CAM 2 — FLOOR 5",
                                         time: "10:15:24",
                                         src: cctvImage2,
                                         alert: true,
                                     },
                                     {
                                         id: 3,
-                                        label: "CAM 3 — PARKING",
+                                        label: "LIFT CAM 3 — BASEMENT",
                                         time: "10:15:23",
                                         src: cctvImage3,
                                         alert: false,
                                     },
                                     {
                                         id: 4,
-                                        label: "CAM 4 — LOBBY",
+                                        label: "LIFT CAM 4 — LOBBY",
                                         time: "10:15:25",
                                         src: cctvImage4,
                                         alert: false,
@@ -175,9 +175,9 @@ export default function LandingPage() {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="text-center"
                         >
-                            <div className="text-4xl font-bold text-electric mb-2">1,500+</div>
+                            <div className="text-4xl font-bold text-electric mb-2">3</div>
                             <div className="text-sm text-gray-400 uppercase tracking-wide">
-                                Active Units
+                                Detection Categories
                             </div>
                         </motion.div>
                     </div>
@@ -189,11 +189,11 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl font-bold text-white mb-4">
-                            Advanced AI for Modern Security Infrastructure
+                            AI-Powered Lift Safety System
                         </h2>
                         <p className="text-gray-400 max-w-2xl mx-auto">
-                            Powered by deep learning models trained on extensive datasets,
-                            providing unparalleled accuracy in threat detection.
+                            Detect violence, hood touch, and inappropriate contact in
+                            elevator CCTV footage using advanced computer vision.
                         </p>
                     </div>
 
@@ -210,21 +210,20 @@ export default function LandingPage() {
                                         <Cpu className="h-6 w-6 text-electric" />
                                     </div>
                                     <h3 className="text-xl font-semibold text-white mb-3">
-                                        CNN-LSTM Engine
+                                        Violence Detection
                                     </h3>
                                     <p className="text-gray-400 mb-4">
-                                        Our hybrid deep learning architecture combines spatial feature
-                                        extraction with temporal sequence analysis for precise violence
-                                        detection in video streams.
+                                        Detects physical fights and aggressive behavior inside lifts
+                                        using motion analysis and person tracking with YOLO.
                                     </p>
                                     <ul className="space-y-2">
                                         <li className="flex items-start gap-2 text-sm text-gray-300">
                                             <CheckCircle className="h-4 w-4 text-electric mt-0.5 flex-shrink-0" />
-                                            Real-time frame analysis
+                                            Multi-person aggression detection
                                         </li>
                                         <li className="flex items-start gap-2 text-sm text-gray-300">
                                             <CheckCircle className="h-4 w-4 text-electric mt-0.5 flex-shrink-0" />
-                                            Temporal pattern recognition
+                                            Weapon identification
                                         </li>
                                     </ul>
                                 </CardContent>
@@ -243,21 +242,21 @@ export default function LandingPage() {
                                         <Bell className="h-6 w-6 text-electric" />
                                     </div>
                                     <h3 className="text-xl font-semibold text-white mb-3">
-                                        Automated Alerts
+                                        Hood Touch Detection
                                     </h3>
                                     <p className="text-gray-400 mb-4">
-                                        Instant notifications to security personnel when threats are
-                                        detected. Configurable alert thresholds and multi-channel
-                                        delivery systems.
+                                        Identifies when a person covers their face or head
+                                        with a hood or garment — a common precursor to
+                                        criminal activity in enclosed spaces.
                                     </p>
                                     <ul className="space-y-2">
                                         <li className="flex items-start gap-2 text-sm text-gray-300">
                                             <CheckCircle className="h-4 w-4 text-electric mt-0.5 flex-shrink-0" />
-                                            SMS, email, and app notifications
+                                            Head-region motion analysis
                                         </li>
                                         <li className="flex items-start gap-2 text-sm text-gray-300">
                                             <CheckCircle className="h-4 w-4 text-electric mt-0.5 flex-shrink-0" />
-                                            Priority escalation workflows
+                                            Sustained behavior tracking
                                         </li>
                                     </ul>
                                 </CardContent>
@@ -276,20 +275,20 @@ export default function LandingPage() {
                                         <FolderSearch className="h-6 w-6 text-electric" />
                                     </div>
                                     <h3 className="text-xl font-semibold text-white mb-3">
-                                        Verifiable Evidence
+                                        Bad Touch Detection
                                     </h3>
                                     <p className="text-gray-400 mb-4">
-                                        Automatic recording and archival of incident footage with
-                                        tamper-proof timestamps and chain-of-custody documentation.
+                                        Detects unwanted physical contact between persons in
+                                        the lift by analyzing body overlap and motion patterns.
                                     </p>
                                     <ul className="space-y-2">
                                         <li className="flex items-start gap-2 text-sm text-gray-300">
                                             <CheckCircle className="h-4 w-4 text-electric mt-0.5 flex-shrink-0" />
-                                            Encrypted cloud storage
+                                            Proximity overlap analysis
                                         </li>
                                         <li className="flex items-start gap-2 text-sm text-gray-300">
                                             <CheckCircle className="h-4 w-4 text-electric mt-0.5 flex-shrink-0" />
-                                            Exportable incident reports
+                                            Contact motion detection
                                         </li>
                                     </ul>
                                 </CardContent>
@@ -305,11 +304,11 @@ export default function LandingPage() {
                     <Card className="bg-gradient-to-r from-electric-dark via-electric to-electric-light border-0 overflow-hidden">
                         <CardContent className="p-12 text-center">
                             <h2 className="text-3xl md:text-4xl font-bold text-navy-light mb-4">
-                                Ready to secure your public spaces with next-generation AI?
+                                Ready to secure your lifts with AI-powered surveillance?
                             </h2>
                             <p className="text-navy-light/80 text-lg mb-8 max-w-2xl mx-auto">
-                                Join hundreds of organizations protecting communities with
-                                ProTechVision
+                                Protect elevator passengers with real-time violence, hood touch,
+                                and bad touch detection
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                 <Button
